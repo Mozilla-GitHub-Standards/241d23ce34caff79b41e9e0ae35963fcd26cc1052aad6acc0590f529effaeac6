@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 import copy
 
 def PayloadParseError(Exception): pass
+def ProcessError(Exception): pass
 class DataMissing(Exception): 
 	def __init__(self, v):
 		self.value = v
@@ -26,6 +27,10 @@ def days(data):
 #################################
 #   AFTER THE PROCESSING
 #################################
+
+def date(processed_data, return_string=True):
+	if return_string: return processed_data['date'].strftime('%Y-%m-%d')
+	return processed_data['date']
 
 def release_channel(processed_data):
 	return processed_data['environment']['org.mozilla.appInfo.appinfo']['updateChannel']
@@ -71,13 +76,13 @@ def was_active(processed_data):
 def country_code(processed_data):
 	return processed_data['environment']['country_code']
 
-FACETS = [
-	['country', fhr_plugin.country],
-	['release_channel', fhr_plugin.release_channel],
-	['windows_os_version', fhr_plugin.os_version],
-	['date', partial(fhr_plugin.date, resolution='weekly')]
-]
-
+def MTBF(processed_data):
+	total_time   = total_session_time(processed_data)
+	plugin_hangs = total_plugin_hangs(processed_data)
+	if plugin_hangs > 0:
+		return total_time / plugin_hangs
+	else:
+		return None
 
 # copy everything in last that is relevant
 # for each day, give all the relevant data:
@@ -116,9 +121,10 @@ def organize_data_into_time_periods(data, resolution='weekly'):
 			to = fr + timedelta(days=31)
 			to = to - timedelta(days=to.day) + timedelta(days=1)
 
-		if fr not in matched:                        matched[fr]                       = {}
-		if 'environment' not in matched[fr]:         matched[fr]['environment']        = copy.deepcopy(default_environment)
+		if fr not in matched:                                 matched[fr]                       = {}
+		if 'date' not in matched[fr]:                         matched[fr]['date'] = fr
+		if 'environment' not in matched[fr]:                  matched[fr]['environment']        = copy.deepcopy(default_environment)
 		if 'country_code' not in matched[fr]['environment']:  matched[fr]['environment']['country_code'] = _country
-		if 'data'       not in matched[fr]:          matched[fr]['data']               = []
+		if 'data'       not in matched[fr]:                   matched[fr]['data']               = []
 		matched[fr]['data'].append(days[day])
 	return matched
