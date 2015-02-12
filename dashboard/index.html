@@ -1,0 +1,114 @@
+
+<html lang="en">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>Flash Crashes</title>
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="css/metricsgraphics.css" rel="stylesheet" type="text/css" id="light">
+    <link href="" rel="stylesheet" type="text/css" id="dark">
+    <link href="css/firefox.css" rel="stylesheet" type="text/css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js" charset="utf-8"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src='js/crossfilter.min.js'></script>
+    <script src='js/metricsgraphics.min.js'></script>
+    <script src='js/main.js'></script>
+</head>
+
+<body>
+    <div class='container'>
+        <header>
+        
+            <ul>
+                <li><a href='https://github.com/mozilla/firefox-weekly-dashboard/'>Code</a></li>
+                <li><a href='https://github.com/mozilla/firefox-weekly-dashboard/issues'>Issues</a></li>
+                <li class='permalink'><a href='?os=all&geo=all&channel=all&timescale=weekly'><i class='fa fa-link'></i> Permalink</a></li>
+                <li class='updated_label'>Data last pulled <span class='updated_date'></span></li>
+            </ul>
+            
+            <div class='row'>
+                <div class='col-lg-3'></div>
+                <div class='col-lg-6'>
+                    <h1>Flash Crashes in Firefox</h1>
+                </div>
+                <div class='col-lg-3'></div>
+            </div>
+
+<!--             <div id='description'>
+                <p>This dashboard is our first attempt at creating a useful 
+                weekly view for Desktop stakeholders. We are still in the process of 
+                getting this to update more quickly and regularly, as well as 
+                calculating the metrics currently missing here. 
+                </p>
+
+            </div> -->
+
+            <div class='aaahhh'>
+                <div class="alert alert-warning">
+                    Sadly, that segment contains insufficient data.
+                    <i class="fa fa-frown-o fa-x"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class='row links-and-buttons'>
+
+        </div>
+<!-- 
+        <div class='row'>
+            <div class='col-lg-4 gr' id='uai'></div>
+            <div class='col-lg-4 gr' id='total-hours'></div>
+            <div class='col-lg-4 gr' id='inactive'></div>
+        </div> -->
+
+        <div id='trunk'>
+            <div class='row trunk-section'>
+                <div class='col-lg-4'>
+                    <h2 class='trunk-title'>Users without Plugin Hangs</h2>
+
+                    <p>To the right is the percentage of users without any plugin hangs at all.</p>
+                </div>
+
+                <div class='col-lg-8'>
+                    <div class='row'>
+                        <div class='col-lg-12 gr' id='no-plugin-hangs'></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class='row trunk-section'>
+                <div class='col-lg-4'>
+                    <h2 class='trunk-title'>Average Session lengths Per Plugin Crash ("Mean Time Between Failures")</h2>
+
+                    <p>The chart on the right illustrates the mean time between failures, which smedberg defines as the total session length divided by the number of plugin crashes.</p>
+  
+                </div>
+
+                <div class='col-lg-8'>
+                    <div class='row'>
+                        <div class='col-lg-6 gr' id='mtbf'></div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div id='footer'>
+            <a href="http://metricsgraphicsjs.org">MetricsGraphics.js 2.1</a>
+            <br />2014 &middot; Shared under a <a href="http://www.mozilla.org/MPL/2.0/">
+            Mozilla Public License</a>
+            <br /><a href="../">See all of our dashboards</a>
+            <br /><a href="https://github.com/mozilla/metrics-graphics">
+                <i class="fa fa-github fa-3x" style="line-height:42px"></i>
+            </a>
+        </div>        
+    </div>
+</body>
+</html>
