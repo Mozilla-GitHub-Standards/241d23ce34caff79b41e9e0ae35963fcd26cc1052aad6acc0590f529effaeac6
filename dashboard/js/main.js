@@ -102,7 +102,11 @@ function nicify(set_items, item_ugly) {
 function update_and_replot(category, feature){
     $('.aaahhh .alert').fadeOut();
     global.facets[category] = feature;
-    console.log(category, feature);
+    if (category == 'os' && feature !='Windows_NT'){
+        $('div.os_version-btns button').prop('disabled', true);
+    } else {
+        $('div.os_version-btns button').prop('disabled', false);
+    }
     global.data.change_facet(category, feature);
     plot_data();
     updatePermalink();
@@ -148,7 +152,6 @@ function plot_data(_data){
         x_accessor: 'date',
         y_accessor: 'hangs_per_record',
     });
-    console.log(data);
     MG.data_graphic({
         title: "Mean Time Between Failures (in hours)",
         description: "The number of records each week with some form of browsing activity.",
@@ -189,6 +192,7 @@ function compare_but_not_other(a,b){
 }
 
 function strip_punctuation(s){
+    s = String(s);
     var punctuationless = s.replace(/[^a-zA-Z0-9 _]+/g, '');
     var finalString = punctuationless.replace(/ +?/g, "");
     return finalString;
@@ -238,6 +242,9 @@ function load_and_prep_data(){
                     return nicify(global.nice_channel, d);
             });
         }
+        // turn off button for 'all' setting to start.
+        $('div.os_version-btns button').prop('disabled', true);
+
         global.data = MGT.segmenter(data).facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
 
         if (!global.first_load_complete){
