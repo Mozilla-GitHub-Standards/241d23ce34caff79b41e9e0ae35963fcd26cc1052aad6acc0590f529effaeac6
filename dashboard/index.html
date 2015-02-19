@@ -16,7 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js" charset="utf-8"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src='js/crossfilter.min.js'></script>
-    <script src='js/metricsgraphics.min.js'></script>
+    <script src='js/metricsgraphics.js'></script>
+    <script src='js/mg-tools.js'></script>
     <script src='js/main.js'></script>
 </head>
 
@@ -56,15 +57,7 @@
             </div>
         </header>
 
-        <div class='row links-and-buttons'>
-
-        </div>
-<!-- 
-        <div class='row'>
-            <div class='col-lg-4 gr' id='uai'></div>
-            <div class='col-lg-4 gr' id='total-hours'></div>
-            <div class='col-lg-4 gr' id='inactive'></div>
-        </div> -->
+        <div class='row links-and-buttons'></div>
 
         <div id='trunk'>
             <div class='row trunk-section'>
@@ -76,7 +69,8 @@
 
                 <div class='col-lg-8'>
                     <div class='row'>
-                        <div class='col-lg-12 gr' id='no-plugin-hangs'></div>
+                        <div class='col-lg-6 gr' id='no-plugin-hangs'></div>
+                        <div class='col-lg-6 gr' id='hangs-per-record'></div>
                     </div>
                 </div>
             </div>
@@ -85,7 +79,7 @@
                 <div class='col-lg-4'>
                     <h2 class='trunk-title'>Average Session lengths Per Plugin Crash ("Mean Time Between Failures")</h2>
 
-                    <p>The chart on the right illustrates the mean time between failures, which smedberg defines as the total session length divided by the number of plugin crashes.</p>
+                    <p>The chart on the right illustrates the mean time between failures, defined as the total session length divided by the number of plugin crashes. Shown here only reflects the records that have </p>
   
                 </div>
 

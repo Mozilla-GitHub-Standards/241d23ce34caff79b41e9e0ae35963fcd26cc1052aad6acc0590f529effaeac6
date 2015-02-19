@@ -5,6 +5,10 @@ import cPickle
 from pprint import pprint
 import sys
 
+COUNTRIES = set(['US','CA','BR','MX','FR','ES','IT','PL','TR','RU','DE','IN','ID','CN','JP','GB'])
+CHANNELS = set(['release', 'beta', 'aurora', 'nightly', 'esr'])
+OSES = set(['Windows_NT', 'Linux', 'Darwin'])
+
 def cPickle_deep_copy(obj):
     try:
         return cPickle.loads(cPickle.dumps(obj, -1))
@@ -48,12 +52,17 @@ def release_channel(processed_data):
     except: raise DataMissing('release_channel-org.mozilla.appInfo.appinfo')
     try: out=out['updateChannel']
     except: raise DataMissing('release_channel-updateChannel')
+    if out not in CHANNELS:
+        out = 'other'
     return out
     
 
 def OS(processed_data):
     try:
-        return processed_data['environment']['org.mozilla.sysinfo.sysinfo']['name']
+        o = processed_data['environment']['org.mozilla.sysinfo.sysinfo']['name']
+        if o not in OSES:
+            o = 'other'
+        return o
     except:
         raise DataMissing('os-version')
 
@@ -95,7 +104,10 @@ def was_active(processed_data):
     return False
         
 def geoCountry(unprocessed_data):
-    return unprocessed_data['geoCountry']
+    c = unprocessed_data['geoCountry']
+    if c not in COUNTRIES:
+        return 'other'
+    return c
 
 def country_code(processed_data):
     return processed_data['environment']['country_code']
@@ -103,7 +115,7 @@ def country_code(processed_data):
 def MTBF(processed_data):
     total_time   = total_session_time(processed_data)
     plugin_hangs = total_plugin_hangs(processed_data)
-    if plugin_hangs > 0:
+    if plugin_hangs >= 2:
         return total_time / plugin_hangs
     else:
         return None
