@@ -65,33 +65,7 @@ function multiply_up(data,k){
     return data;
 }
 
-//http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter
-function getUrlParams() {
-    var query_string = {};
-    var query = window.location.search.substring(1);
-    var vars = query.split("&");
-    for (var i=0;i<vars.length;i++) {
-        var pair = vars[i].split("=");
-        // If first entry with this name
-        if (pair != '') {
-            pair[1] = (pair[1][pair[1].length-1] === '/')
-                ? pair[1].slice(0,pair[1].length-1) 
-                : pair[1];
-        }
-        
-        if (typeof query_string[pair[0]] === "undefined") {
-            query_string[pair[0]] = pair[1];
-        // If second entry with this name
-        } else if (typeof query_string[pair[0]] === "string") {
-            var arr = [ query_string[pair[0]], pair[1] ];
-            query_string[pair[0]] = arr;
-        // If third or later entry with this name
-        } else {
-            query_string[pair[0]].push(pair[1]);
-        }
-    }
-    return query_string;
-}
+
 
 function nicify(set_items, item_ugly) {
     return (set_items[item_ugly] == undefined)
@@ -211,15 +185,13 @@ function strip_punctuation(s){
     return finalString;
 }
 
-
-
 function isEmpty(object) { for(var i in object) { return true; } return false; }
 
 
 function load_and_prep_data(){
     // set time scale before loading data, since it is dependent on it.
     
-    var params = getUrlParams();
+    var params = MGT.get_url_params();
     //if neither the global timescale nor the param time scale are set, use the default
     if(global.facets.timescale == '' 
             && params['timescale'] == undefined) {
@@ -261,7 +233,7 @@ function load_and_prep_data(){
         global.data = MGT.segmenter(data).facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
 
         if (!global.first_load_complete){
-            var url_params = getUrlParams();
+            var url_params = MGT.get_url_params();
             areWeSettingOptionsOnFirstLoad(url_params);    
         }
         
@@ -393,7 +365,7 @@ $(document).ready(function() {
         'missing': 'Missing'
     }
     
-    var url_params = getUrlParams();
+    var url_params = MGT.get_url_params();
 
     d3.json('data/firefox_releases.json', function(releases){
         var releases = releases['releases']
