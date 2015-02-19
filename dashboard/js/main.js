@@ -153,6 +153,19 @@ function plot_data(_data){
         y_accessor: 'hangs_per_record',
     });
     MG.data_graphic({
+        title: "Plugin Hangs Per Haver-Of-Hangs",
+        description: "The number of plugin hangs per hang-haver. If a record had no plugin hang, it is not counted here.",
+        data: data,
+        markers: global.releases,
+        width: torso.width,
+        height: torso.height,
+        right: torso.right,
+        xax_format: xax_formatter,
+        target: 'div#per_haver',
+        x_accessor: 'date',
+        y_accessor: 'per_haver',
+    });
+    MG.data_graphic({
         title: "Mean Time Between Failures (in hours)",
         description: "The number of records each week with some form of browsing activity.",
         data: data,
@@ -287,8 +300,13 @@ function prep_data(data){
     });
     //data = MG.convert.number(data, 'mtbf');
     data.forEach(function(d){
-        d.no_hang_perc = d.no_hangs / d.actives;
-        d.hangs_per_record = d.total_hangs / d.actives * 100;
+        var dnh = d.actives - d.no_hangs;
+        d.no_hang_perc = d.no_hangs / (d.actives);
+        d.hangs_per_record = d.total_hangs / d.actives*100;//d.total_hangs / (d.actives - d.no_hangs);
+        d.per_haver = d.total_hangs / (d.actives - d.no_hangs);
+        if (isNaN(d.per_haver)){
+            d.per_haver = 0;
+        }
     });
     var facets = Object.keys(global.facets);
     var this_facet, all_values;
