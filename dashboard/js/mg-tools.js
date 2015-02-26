@@ -1,6 +1,19 @@
 /*
 
+MGT.namespace
+
+facets are the keys that we are filtering data sets on.
+contexts are just helpers to maintain some global values. For instance, we may want
+to switch data sets depending on the context, so all we really need to do is keep track of that on
+some sort of global level.
+
 function(data){
+
+	var globals = MGT.namespace();
+	globals.add_facets(['os', 'os_version', 'country', 'channel']);
+	globals.add_dataset(data, 'plugin-crashesc'); // this data set should have all the facets.
+	globals.context('timescale', 'weekly');
+
 	globals.data = MGT.segmenter(data).facets(['os', 'os_version', 'country', 'channel']);
 	var new_data = globals.data
 					.change_facet('os', 'Windows_NT')
@@ -11,31 +24,82 @@ function(data){
 
 var MGT={}
 
+function _get_or_set(thing, key, args){
+	if (args.length==0) return thing[key];
+	if (args.length==1) return thing[key][args[0]];
+	thing[key][args[0]]=this.args[1];
+	return thing;
+}
+
+MGT.namespace=function(){
+	this.contexts = {};
+	this._dimensions = {};
+	this._facets={};
+
+	this.data_sets = {};
+
+	this.add_facets = function(facets){
+		var these_facets = this._facets;
+		Object.keys(facets).forEach(function(f){
+			these_facets[f] = null;
+		});
+		return this;
+	}
+
+	this.context = function(){
+		return _get_or_set(this, 'context', arguments);
+	}
+
+	this.facet = function(){
+		return _get_or_set(this, '_facets', arguments);
+	}
+
+	this.add_dataset = function(data, moniker){
+		var own_facets;
+		if (arguments.length   == (3)){
+			own_facets = arguments[2];
+		}
+		this.data_sets[moniker] = MGT.segmenter(data);
+		if (own_facets) this.data_sets[moniker].add_facets(own_facets);
+		else this.data_sets[moniker].add_facets(Object.keys(this._facets));
+		return this;
+	}
+
+	this.dataset = function(moniker){
+		return this.data_sets[moniker];
+	}
+
+	return this;
+}
+
 MGT.segmenter=function(data){
+
 	this._facets = [];
 	var _ = index_data(data);
 	this.dims = _.dims;
 	this.data = _.data;
 	this.current_facets = {};
 
-	this.facets = function(){
+	this.add_facets = function(){
 		var facets;
-		var cf = this.current_facets;
 		if (arguments.length) facets = arguments[0];
-		else {
-			return this._facets;
-		} 
+		else return this._facets;
+
+		var cf = this.current_facets;
+
 		this._facets = facets;
 		this._facets.forEach(function(f){
-			cf[f] == 'all';
+			cf[f] == null;
 		})
 		return this;
 	}
 
-	this.change_facet = function(key, value){
-		this.current_facets[key] = value;
-		console.log(this.current_facets);
-		return this;
+	this.has_facet = function(key){
+		return this.current_facets.hasOwnProperty(key);
+	}
+
+	this.facet = function(){
+		return _get_or_set(this, 'current_facets', arguments);
 	}
 
 	this.set_all_facets = function(s){

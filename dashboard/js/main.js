@@ -81,7 +81,7 @@ function update_and_replot(category, feature){
     } else {
         $('div.os_version-btns button').prop('disabled', false);
     }
-    global.data.change_facet(category, feature);
+    global.data.facet(category, feature);
     plot_data();
     updatePermalink();
 }
@@ -230,7 +230,7 @@ function load_and_prep_data(){
         // turn off button for 'all' setting to start.
         $('div.os_version-btns button').prop('disabled', true);
 
-        global.data = MGT.segmenter(data).facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
+        global.data = MGT.segmenter(data).add_facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
 
         if (!global.first_load_complete){
             var url_params = MGT.get_url_params();
