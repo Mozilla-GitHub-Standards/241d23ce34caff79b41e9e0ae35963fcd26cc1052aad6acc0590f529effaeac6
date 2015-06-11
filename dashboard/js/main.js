@@ -15,6 +15,7 @@ var global = {}
 global.first_load_complete=false;
 
 global.data = {};
+global.dims = {};
 
 global.facets = {};
 global.facets.os            = 'all';
@@ -61,14 +62,14 @@ function areWeSettingOptionsOnFirstLoad(url_params){
 
 function updatePermalink() {
     var updated_url = '';
-    var facets = global.facet();
+    var facets = Object.keys(global.facets);//   global.facet();
     var this_facet;
     var which_char;
     for (var i=0;i<facets.length; i++){
         this_facet = facets[i];
         if (i==0) which_char = '?';
         else which_char = '&';
-        updated_url += which_char + this_facet + '=' + strip_punctuation(global.facet(this_facet));
+        updated_url += which_char + this_facet + '=' + strip_punctuation(global.facets[this_facet]);
     }
     $('.permalink a').attr('href', updated_url);
 }    
@@ -91,28 +92,52 @@ function nicify(set_items, item_ugly) {
 
 function update_and_replot(category, feature){
     $('.aaahhh .alert').fadeOut();
-    global.facet(category, feature);// = feature;
+
+    global.facets[category] = feature;//  global.facet(category, feature);// = feature;
 
     if (category == 'os' && feature !='Windows_NT'){
         $('div.os_version-btns button').prop('disabled', true);
-        global.facet('os_version', 'all');
+        global.facets['os_version'] = 'all';
+        //global.facet('os_version', 'all');
     } else {
         $('div.os_version-btns button').prop('disabled', false);
     }
     // CHANGE
-    global.data.facet(category, feature);
+    //global.facets[category] = feature;
+    //console.log('sdofinsd', category, feature);
     plot_data();
     updatePermalink();
 }
 
-function cut_data(){
-    // CHANGE
-    return global.data.filter();
-}
+function cut_data() {
+    var geo, channel, os;
+    if (arguments.length){
+        var args = arguments[0];
+        var geo     = args.hasOwnProperty('country') ?     args.country     : global.facets.country;
+        var channel = args.hasOwnProperty('channel') ? args.channel : global.facets.channel;
+        var os      = args.hasOwnProperty('os') ?      args.os      : global.facets.os;
+    } else {
+        var geo = global.facets.country;
+        var channel = global.facets.channel;
+        var os = global.facets.os;
+    }
 
+    var ts = global.facets.timescale;
+    global.dims[ts].os.filterAll();
+    global.dims[ts].country.filterAll();
+    global.dims[ts].channel.filterAll();
+    
+    global.dims[ts].os.filter(os);
+    global.dims[ts].country.filter(geo);
+    global.dims[ts].channel.filter(channel);
+    var d = global.dims[ts].actives.top(Infinity);
+    return d;
+}
 function plot_data(_data){
 
     var data = cut_data();
+    console.log(data[0]);
+    //console.log(data, 'ehlsidh')
     data = data.filter(function(d){
         return d.date > new Date('2014-09-15') && d.date < new Date('2015-06-01');
     });
@@ -255,7 +280,17 @@ function load_and_prep_data(){
         // turn off button for 'all' setting to start.
         $('div.os_version-btns button').prop('disabled', true);
 
-        global.data = MGT.segmenter(data).add_facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
+        //global.data = MGT.segmenter(data).add_facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
+        global.data[ts] = crossfilter(data);
+        global.dims[ts] = {};
+        global.dims[ts].date         = global.data[ts].dimension(function(d){return d.date});
+        global.dims[ts].os           = global.data[ts].dimension(function(d){return d.os});
+        global.dims[ts].country          = global.data[ts].dimension(function(d){return d.country});
+        global.dims[ts].channel      = global.data[ts].dimension(function(d){return d.channel});
+        global.dims[ts].actives      = global.data[ts].dimension(function(d){return d.actives});
+        global.dims[ts].no_hangs      = global.data[ts].dimension(function(d){return d.no_hangs});
+        global.dims[ts].total_hangs      = global.data[ts].dimension(function(d){return d.total_hangs});
+        global.dims[ts].mtbf      = global.data[ts].dimension(function(d){return d.mtbf});
 
         if (!global.first_load_complete){
 
@@ -317,7 +352,6 @@ function prep_data(data){
             if (this_facet !='timescale'){
                 all_values = uniq(data, this_facet).values();
                 for (var j=0; j < all_values.length; j++){
-                    console.log(this_facet);
                     global.facet_keys[this_facet][strip_punctuation(all_values[j])] = all_values[j];
                 }
                 
