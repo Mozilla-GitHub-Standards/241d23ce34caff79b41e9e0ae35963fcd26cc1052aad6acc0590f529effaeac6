@@ -22,12 +22,26 @@ function(data){
 
 */
 
+function areWeSettingOptionsOnFirstLoad(url_params){
+    var facets = Object.keys(global.facets);
+    var this_facet;
+    var gs = {};
+    for (var i=0; i<facets.length;i++){
+        this_facet = facets[i];
+        if (!url_params.hasOwnProperty(this_facet)) return;
+        global.facets[this_facet] = url_params[this_facet] == undefined ? (this_facet == 'timescale' ? 'weekly' : 'all') : global.facet_keys[this_facet][url_params[this_facet]];//  url_params[this_facet];
+        $('.'+this_facet+'-btns button.btn span.title').html(global.facet_keys[this_facet][url_params[this_facet]]);
+    }
+    $('.aaahhh .alert').fadeOut();
+    updatePermalink();
+}
+
 var MGT={}
 
 function _get_or_set(thing, key, args){
 	if (args.length==0) return thing[key];
 	if (args.length==1) return thing[key][args[0]];
-	thing[key][args[0]]=this.args[1];
+	thing[key][args[0]]=args[1];
 	return thing;
 }
 
@@ -35,7 +49,7 @@ MGT.namespace=function(){
 	this.contexts = {};
 	this._dimensions = {};
 	this._facets={};
-
+	this.first_load_complete=false;
 	this.data_sets = {};
 
 	this.add_facets = function(facets){
@@ -65,9 +79,30 @@ MGT.namespace=function(){
 		return this;
 	}
 
+	this.has_dataset = function(moniker){
+		return this.data_sets.hasOwnProperty(moniker);
+	}
+
 	this.dataset = function(moniker){
 		return this.data_sets[moniker];
 	}
+
+	this.set_url_params=function(){
+		var url_params = get_url_params();
+	    var facets = this._facets;
+	    var this_facet;
+	    var this_facet_value;
+	    var gs = {};
+	    for (var i=0; i<facets.length;i++){
+	        this_facet = facets[i];
+	        if (!url_params.hasOwnProperty(this_facet)) return;
+	        this_facet_value =  url_params[this_facet] == undefined ? (this_facet == 'timescale' ? 'weekly' : 'all') : global.facet_keys[this_facet][url_params[this_facet]];//  url_params[this_facet];
+	        global.facet(this_facet) =this_facet_value;
+	        $('.'+this_facet+'-btns button.btn span.title').html(global.facet_keys[this_facet][url_params[this_facet]]);
+	    }
+	    $('.aaahhh .alert').fadeOut();
+	    updatePermalink();
+}
 
 	return this;
 }
@@ -145,7 +180,7 @@ function index_data(data){
 }
 
 
-MGT.get_url_params = function(){
+function get_url_params(){
     //http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter
     var query_string = {};
     var query = window.location.search.substring(1);

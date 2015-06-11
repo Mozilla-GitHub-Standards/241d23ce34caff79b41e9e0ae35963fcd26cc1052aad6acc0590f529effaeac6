@@ -1,14 +1,28 @@
 'use strict';
 
-var global     = {};
+//var global     = {};
+var global = {}
+// global.first_load_complete = false;
+
+// global.add_facets(['os', 'os_version', 'country', 'channel'])
+//       .facet('os', 'all')
+//       .facet('os_version', 'all')
+//       .facet('country', 'all')
+//       .facet('channel', 'all');
+// global.context('timescale', 'weekly');
+
+
 global.first_load_complete=false;
+
 global.data = {};
+
 global.facets = {};
 global.facets.os            = 'all';
 global.facets.os_version    = 'all';
 global.facets.country           = 'all';
 global.facets.channel       = 'all';
 global.facets.timescale    = 'weekly';
+
 global.feature_set = {};
 
 global.facet_keys = {};
@@ -30,13 +44,15 @@ trunk.left = 40;
 trunk.right = 10;
 
 function areWeSettingOptionsOnFirstLoad(url_params){
-    var facets = Object.keys(global.facets);
+    var facets = global.facets;
     var this_facet;
+    var this_right_side;
     var gs = {};
-    for (var i=0; i<facets.length;i++){
-        this_facet = facets[i];
+    for (var this_facet in facets){
+        //this_facet = facets[i];
         if (!url_params.hasOwnProperty(this_facet)) return;
-        global.facets[this_facet] = url_params[this_facet] == undefined ? (this_facet == 'timescale' ? 'weekly' : 'all') : global.facet_keys[this_facet][url_params[this_facet]];//  url_params[this_facet];
+        this_right_side = url_params[this_facet] == undefined ? (this_facet == 'timescale' ? 'weekly' : 'all') : global.facet_keys[this_facet][url_params[this_facet]];//  url_params[this_facet];
+        //global.facets[this_facet];// = url_params[this_facet] == undefined ? (this_facet == 'timescale' ? 'weekly' : 'all') : global.facet_keys[this_facet][url_params[this_facet]];//  url_params[this_facet];
         $('.'+this_facet+'-btns button.btn span.title').html(global.facet_keys[this_facet][url_params[this_facet]]);
     }
     $('.aaahhh .alert').fadeOut();
@@ -45,14 +61,14 @@ function areWeSettingOptionsOnFirstLoad(url_params){
 
 function updatePermalink() {
     var updated_url = '';
-    var facets = Object.keys(global.facets);
+    var facets = global.facet();
     var this_facet;
     var which_char;
     for (var i=0;i<facets.length; i++){
         this_facet = facets[i];
         if (i==0) which_char = '?';
         else which_char = '&';
-        updated_url += which_char + this_facet + '=' + strip_punctuation(global.facets[this_facet]);
+        updated_url += which_char + this_facet + '=' + strip_punctuation(global.facet(this_facet));
     }
     $('.permalink a').attr('href', updated_url);
 }    
@@ -75,25 +91,30 @@ function nicify(set_items, item_ugly) {
 
 function update_and_replot(category, feature){
     $('.aaahhh .alert').fadeOut();
-    global.facets[category] = feature;
+    global.facet(category, feature);// = feature;
+
     if (category == 'os' && feature !='Windows_NT'){
         $('div.os_version-btns button').prop('disabled', true);
+        global.facet('os_version', 'all');
     } else {
         $('div.os_version-btns button').prop('disabled', false);
     }
+    // CHANGE
     global.data.facet(category, feature);
     plot_data();
     updatePermalink();
 }
 
 function cut_data(){
+    // CHANGE
     return global.data.filter();
 }
 
 function plot_data(_data){
+
     var data = cut_data();
     data = data.filter(function(d){
-        return d.date > new Date('2014-09-15') && d.date < new Date('2015-02-04');
+        return d.date > new Date('2014-09-15') && d.date < new Date('2015-06-01');
     });
 
     var first_date = d3.min(data, function(d){
@@ -191,7 +212,7 @@ function isEmpty(object) { for(var i in object) { return true; } return false; }
 function load_and_prep_data(){
     // set time scale before loading data, since it is dependent on it.
     
-    var params = MGT.get_url_params();
+    var params = get_url_params();
     //if neither the global timescale nor the param time scale are set, use the default
     if(global.facets.timescale == '' 
             && params['timescale'] == undefined) {
@@ -217,9 +238,13 @@ function load_and_prep_data(){
                 .callback(update_and_replot)
                 .display();
             //
-            $(".geo-btns ul li a")
+            $(".country-btns ul li a")
                 .html(function(i,d) {
                     return nicify(global.nice_country, d);
+            });
+            $(".os-btns ul li a")
+                .html(function(i,d) {
+                    return nicify(global.nice_os, d);
             });
             
             $(".channel-btns ul li a")
@@ -233,7 +258,10 @@ function load_and_prep_data(){
         global.data = MGT.segmenter(data).add_facets(['os', 'os_version', 'country', 'channel']).set_all_facets('all');
 
         if (!global.first_load_complete){
-            var url_params = MGT.get_url_params();
+
+            //MGT.set_options();
+
+            var url_params = get_url_params();
             areWeSettingOptionsOnFirstLoad(url_params);    
         }
         
@@ -280,7 +308,8 @@ function prep_data(data){
             d.per_haver = 0;
         }
     });
-    var facets = Object.keys(global.facets);
+
+    var facets = global.facets;
     var this_facet, all_values;
     if (isEmpty(global.facet_keys)){
         for (var i=0; i < facets.length; i++){
@@ -288,6 +317,7 @@ function prep_data(data){
             if (this_facet !='timescale'){
                 all_values = uniq(data, this_facet).values();
                 for (var j=0; j < all_values.length; j++){
+                    console.log(this_facet);
                     global.facet_keys[this_facet][strip_punctuation(all_values[j])] = all_values[j];
                 }
                 
@@ -364,8 +394,13 @@ $(document).ready(function() {
         'SunOS': 'Sun OS',
         'missing': 'Missing'
     }
-    
-    var url_params = MGT.get_url_params();
+    d3.xhr('data/last_updated.json', function(dt){
+
+        dt = new Date(dt.response);
+        
+        d3.select('span.updated_date').html(prettyDate(dt));
+    })
+    var url_params = get_url_params();
 
     d3.json('data/firefox_releases.json', function(releases){
         var releases = releases['releases']
